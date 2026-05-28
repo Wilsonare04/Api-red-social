@@ -16,12 +16,30 @@ connection();
 const app = express();
 const puerto = process.env.PORT || 3900;
 
+// Asegurar que las carpetas de subida existan en producción
+const fs = require("fs");
+const path = require("path");
+const carpetas = [
+  path.join(__dirname, "uploads"),
+  path.join(__dirname, "uploads", "avatars"),
+  path.join(__dirname, "uploads", "publications")
+];
+carpetas.forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+});
+
 // Configurar cors
 app.use(cors());
 
 // Convertir los datos del body a objetos js
 app.use(express.json());
 app.use(express.urlencoded({extended: true})); 
+
+// Servir la carpeta de subidas de forma estática para producción
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 
 // Cargar conf rutas
 const UserRoutes = require("./routes/user");
